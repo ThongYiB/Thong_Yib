@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flower For You</title>
+    <style>
+       
+        body {
+            margin: 0;
+            height: 100vh;
+            background: radial-gradient(circle at center, #2e1d4d 0%, #0b0617 100%);
+            overflow: hidden;
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .bouquet {
+            position: relative;
+            width: 300px;
+            height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end; 
+            z-index: 10;
+        }
+
+        .flower-wrapper {
+            position: absolute;
+            bottom: 40px;
+            display: flex;
+            justify-content: center;
+            transform-origin: bottom center;
+            transform: rotate(var(--angle)) scale(var(--scale));
+        }
+
+        .stem {
+            position: relative;
+            width: 8px;
+            height: 0; 
+            background: linear-gradient(to top, #1a4a15, #357a26); 
+            border-radius: 4px;
+            animation: growStem 2s ease-out forwards;
+            animation-delay: var(--delay);
+        }
+
+        .thorn {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+            opacity: 0;
+            animation: fadeIn 1s forwards;
+            animation-delay: calc(var(--delay) + 1s);
+        }
+        .thorn.left { left: -5px; top: 40%; border-right: 6px solid #235c1d; transform: rotate(20deg); }
+        .thorn.right { right: -5px; top: 70%; border-left: 6px solid #235c1d; transform: rotate(-20deg); }
+
+        .leaf {
+            position: absolute;
+            width: 35px;
+            height: 20px;
+            background: #357a26;
+            border-radius: 0 20px 0 20px;
+            opacity: 0;
+            animation: fadeIn 1s forwards;
+            animation-delay: calc(var(--delay) + 1.2s);
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.2);
+        }
+        .leaf.left { left: -30px; bottom: 50px; transform: rotate(-15deg); }
+        .leaf.right { right: -30px; bottom: 80px; transform: rotate(65deg) scaleX(-1); }
+
+        .flower-head {
+            position: absolute;
+            top: 0; 
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 0px; 
+            height: 0px;
+            animation: bloom 3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            animation-delay: calc(var(--delay) + 1.8s);
+        }
+
+        .petal {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #ff0040 0%, #90001a 100%);
+            border-radius: 50% 50% 0 50%;
+            transform-origin: 100% 100%;
+            box-shadow: -2px 2px 6px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 100, 100, 0.2);
+        }
+
+        /* ==========================================================================
+           2. CSS - ผีเสื้อ 4 สี
+           ========================================================================== */
+        .butterfly {
+            position: fixed;
+            width: 24px;
+            height: 18px;
+            z-index: 100;
+            opacity: 0;
+            transform-style: preserve-3d;
+            transition: left var(--move-duration) linear, top var(--move-duration) linear, transform var(--move-duration) linear;
+            animation: butterfly-appear 2s forwards;
+            animation-delay: var(--delay);
+        }
+
+        .wings-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            animation: butterfly-bobbing 1.2s ease-in-out infinite alternate;
+        }
+
+        .wing {
+            position: absolute;
+            top: 0;
+            width: 12px;
+            height: 18px;
+            background: var(--wing-color);
+            box-shadow: 0 0 15px var(--glow-color), inset 0 0 5px rgba(255, 255, 255, 0.9);
+        }
+        
+        .wing.left { left: 0; border-radius: 50% 10% 10% 80%; transform-origin: right center; animation: flap-left 0.15s ease-in-out infinite alternate; }
+        .wing.right { left: 12px; border-radius: 10% 50% 80% 10%; transform-origin: left center; animation: flap-right 0.15s ease-in-out infinite alternate; }
+
+        /* ==========================================================================
+           3. CSS - ดวงดาวระยิบระยับ (ใหม่)
+           ========================================================================== */
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+            z-index: 1; /* ให้อยู่ฉากหลังสุด */
+            /* แอนิเมชันกระพริบ */
+            animation: twinkle var(--twinkle-duration) ease-in-out infinite alternate;
+            animation-delay: var(--twinkle-delay);
+        }
+
+        /* ==========================================================================
+           KEYFRAMES (แอนิเมชัน)
+           ========================================================================== */
+        @keyframes growStem { 0% { height: 0; } 100% { height: var(--h); } }
+        @keyframes bloom { 0% { transform: translate(-50%, -50%) scale(0) rotate(-45deg); } 100% { transform: translate(-50%, -50%) scale(1) rotate(15deg); } }
+        @keyframes fadeIn { 0% { opacity: 0; transform: scale(0) rotate(var(--rot, 0deg)); } 100% { opacity: 1; transform: scale(1) rotate(var(--rot, 0deg)); } }
+        
+        @keyframes butterfly-appear { 100% { opacity: 1; } }
+        @keyframes butterfly-bobbing { 0% { transform: translateY(-5px); } 100% { transform: translateY(5px); } }
+        @keyframes flap-left { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(75deg); } }
+        @keyframes flap-right { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(-75deg); } }
+
+        /* แอนิเมชันกระพริบดาว */
+        @keyframes twinkle {
+            0% { opacity: 0.1; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bouquet" id="bouquetContainer">
+        <div class="flower-wrapper" style="--angle: -35deg; --scale: 0.7; --delay: 1.6s; --h: 150px;">
+            <div class="stem"><div class="thorn left"></div><div class="leaf left" style="--rot: -15deg;"></div><div class="leaf right" style="--rot: 65deg;"></div><div class="flower-head"></div></div>
+        </div>
+        <div class="flower-wrapper" style="--angle: -18deg; --scale: 0.85; --delay: 0.8s; --h: 190px;">
+            <div class="stem"><div class="thorn right"></div><div class="leaf left" style="--rot: -15deg;"></div><div class="leaf right" style="--rot: 65deg;"></div><div class="flower-head"></div></div>
+        </div>
+        <div class="flower-wrapper" style="--angle: 0deg; --scale: 1; --delay: 0s; --h: 230px;">
+            <div class="stem"><div class="thorn left"></div><div class="thorn right"></div><div class="leaf left" style="--rot: -15deg;"></div><div class="leaf right" style="--rot: 65deg;"></div><div class="flower-head"></div></div>
+        </div>
+        <div class="flower-wrapper" style="--angle: 18deg; --scale: 0.85; --delay: 0.4s; --h: 200px;">
+            <div class="stem"><div class="thorn left"></div><div class="leaf left" style="--rot: -15deg;"></div><div class="leaf right" style="--rot: 65deg;"></div><div class="flower-head"></div></div>
+        </div>
+        <div class="flower-wrapper" style="--angle: 35deg; --scale: 0.7; --delay: 1.2s; --h: 160px;">
+            <div class="stem"><div class="thorn right"></div><div class="leaf left" style="--rot: -15deg;"></div><div class="leaf right" style="--rot: 65deg;"></div><div class="flower-head"></div></div>
+        </div>
+    </div>
+
+    <script>
+        const body = document.body;
+
+        // 1. สร้างดวงดาวระยิบระยับ (โค้ดใหม่)
+        const numStars = 30; // จำนวนดาว (ปรับเพิ่มลดตรงนี้ได้เลยครับ)
+        for (let i = 0; i < numStars; i++) {
+            const star = document.createElement('div');
+            star.classList.add('star');
+            
+            // สุ่มตำแหน่งทั่วหน้าจอ
+            const x = Math.random() * window.innerWidth;
+            const y = Math.random() * window.innerHeight;
+            
+            // สุ่มขนาดให้เล็กๆ เป็นธรรมชาติ (1px - 2.5px)
+            const size = (Math.random() * 1.5 + 1).toFixed(2);
+            
+            // สุ่มความเร็วในการกระพริบ
+            const duration = (1 + Math.random() * 2).toFixed(2);
+            const delay = (Math.random() * 2).toFixed(2);
+            
+            star.style.left = `${x}px`;
+            star.style.top = `${y}px`;
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+            
+            // ส่งค่าระยะเวลากระพริบไปให้ CSS
+            star.style.setProperty('--twinkle-duration', `${duration}s`);
+            star.style.setProperty('--twinkle-delay', `${delay}s`);
+            
+            body.appendChild(star);
+        }
+
+        // 2. สร้างกลีบกุหลาบ
+        const flowerHeads = document.querySelectorAll('.flower-head');
+        const totalPetals = 40; 
+        flowerHeads.forEach(head => {
+            for (let i = 0; i < totalPetals; i++) {
+                const petal = document.createElement('div');
+                petal.classList.add('petal');
+                const angle = i * 137.5;
+                const scale = 1 - (i * 0.02);
+                petal.style.transform = `rotate(${angle}deg) scale(${scale})`;
+                head.appendChild(petal);
+            }
+        });
+
+        // 3. สร้างระบบผีเสื้อบินเสรี 8 ตัว 4 สี
+        const numButterflies = 8; 
+        const butterflyColors = [
+            { main: 'rgba(150, 230, 255, 0.9)', glow: 'rgba(135, 206, 250, 0.8)' }, 
+            { main: 'rgba(255, 128, 160, 0.9)', glow: 'rgba(255, 64, 129, 0.8)' },  
+            { main: 'rgba(160, 255, 160, 0.9)', glow: 'rgba(64, 255, 64, 0.8)' },   
+            { main: 'rgba(255, 255, 160, 0.9)', glow: 'rgba(255, 235, 59, 0.8)' }   
+        ];
+
+        function moveButterfly(butterflyEl) {
+            const maxX = window.innerWidth - 30; 
+            const maxY = window.innerHeight - 30;
+            const newX = Math.random() * maxX;
+            const newY = Math.random() * maxY;
+            const currentX = parseFloat(butterflyEl.style.left) || window.innerWidth / 2;
+            const currentY = parseFloat(butterflyEl.style.top) || window.innerHeight / 2;
+            const angleDeg = Math.atan2(newY - currentY, newX - currentX) * 180 / Math.PI;
+            const duration = (2 + Math.random() * 3).toFixed(2);
+            butterflyEl.style.setProperty('--move-duration', `${duration}s`);
+            butterflyEl.style.left = `${newX}px`;
+            butterflyEl.style.top = `${newY}px`;
+            butterflyEl.style.transform = `rotateY(${angleDeg}deg) rotateX(15deg)`;
+            setTimeout(() => { moveButterfly(butterflyEl); }, duration * 1000);
+        }
+
+        for (let i = 0; i < numButterflies; i++) {
+            const butterfly = document.createElement('div');
+            butterfly.classList.add('butterfly');
+            
+            const colorIndex = Math.floor(i / (numButterflies / butterflyColors.length));
+            const chosenColor = butterflyColors[colorIndex];
+            
+            butterfly.style.setProperty('--wing-color', chosenColor.main);
+            butterfly.style.setProperty('--glow-color', chosenColor.glow);
+
+            const startDelay = (3 + Math.random() * 3).toFixed(2);
+            butterfly.style.setProperty('--delay', `${startDelay}s`);
+            butterfly.style.left = `${window.innerWidth / 2}px`;
+            butterfly.style.top = `${window.innerHeight / 2}px`;
+            butterfly.innerHTML = `<div class="wings-container"><div class="wing left"></div><div class="wing right"></div></div>`;
+            
+            body.appendChild(butterfly);
+
+            setTimeout(() => { moveButterfly(butterfly); }, startDelay * 1000);
+        }
+    </script>
+
+</body>
+</html>
